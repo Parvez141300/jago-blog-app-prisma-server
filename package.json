@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
+    "seed:admin": "npx tsx watch src/scripts/seedAdmin.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
