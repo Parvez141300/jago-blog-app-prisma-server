@@ -7,7 +7,7 @@ async function seedAdmin() {
       name: process.env.ADMIN_NAME,
       email: process.env.ADMIN_EMAIL,
       role: UserRole.ADMIN,
-      password: process.env.ADMIN_PASS
+      password: process.env.ADMIN_PASS,
     }
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -20,12 +20,23 @@ async function seedAdmin() {
     const signUpAdmin = await fetch('http://localhost:3000/api/auth/sign-up/email', {
       method: 'POST',
       headers: {
-        "Content-Type" : "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(adminData)
     });
 
     console.log(signUpAdmin);
+
+    if (signUpAdmin.ok) {
+      await prisma.user.update({
+        where: {
+          email: adminData.email as string
+        },
+        data: {
+          emailVerified: true
+        }
+      })
+    }
   } catch (error) {
     console.error(error);
   }
