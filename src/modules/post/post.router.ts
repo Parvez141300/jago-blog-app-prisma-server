@@ -5,7 +5,7 @@ import authMiddleware, { UserRole } from '../../middleware/authMiddleware';
 const router = express.Router();
 
 // get all or search post
-router.get("/", authMiddleware(UserRole.USER), PostController.getAllOrSearchPost);
+router.get("/", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.getAllOrSearchPost);
 // create a post
 router.post("/", authMiddleware(UserRole.USER), PostController.createPost);
    

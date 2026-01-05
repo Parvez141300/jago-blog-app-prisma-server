@@ -2,8 +2,19 @@ import { Post, Post_status } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
-const getAllOrSearchPostFromDB = async (payload: { search: string | undefined, tags: string[] | [], isFeatured: boolean | undefined, status: Post_status, author_id: string | undefined }) => {
+const getAllOrSearchPostFromDB = async (payload: {
+    search: string | undefined,
+    tags: string[] | [],
+    isFeatured: boolean | undefined,
+    status: Post_status,
+    author_id: string | undefined,
+    page: number, limit: number,
+    skip: number,
+    sortBy: string,
+    sortOrder: string
+}) => {
     const addConditions: PostWhereInput[] = [];
+    const sortBy = payload.sortBy;
     if (payload.search) {
         addConditions.push({
             OR: [
@@ -34,24 +45,29 @@ const getAllOrSearchPostFromDB = async (payload: { search: string | undefined, t
             }
         })
     }
-    if(typeof payload.isFeatured === 'boolean'){
+    if (typeof payload.isFeatured === 'boolean') {
         addConditions.push({
             isFeatured: payload.isFeatured
         })
     }
-    if(payload.status){
+    if (payload.status) {
         addConditions.push({
             status: payload.status
         })
     }
-    if(payload.author_id){
+    if (payload.author_id) {
         addConditions.push({
             author_id: payload.author_id
         })
     }
     const result = await prisma.post.findMany({
+        take: payload.limit,
+        skip: payload.skip,
         where: {
             AND: addConditions
+        },
+        orderBy: {
+            [sortBy as string]: payload.sortOrder
         }
     });
     return result;
