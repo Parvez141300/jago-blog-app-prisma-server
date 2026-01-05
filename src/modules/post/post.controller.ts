@@ -24,7 +24,24 @@ const getAllOrSearchPost = async (req: Request, res: Response) => {
         res.status(200).json(result);
     } catch (error: any) {
         res.status(404).json({
-            error: "Failed to create post",
+            error: "Failed to get all post",
+            message: error.message,
+            details: error
+        });
+    }
+};
+
+const getPostById = async (req: Request, res: Response) => {
+    try {
+        const { postId } = req.params;
+        if(!postId){
+            throw new Error("Post id is required!!!");
+        }
+        const result = await PostService.getPostByIdFromDB(postId);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(404).json({
+            error: "Failed to get a post",
             message: error.message,
             details: error
         });
@@ -50,5 +67,6 @@ const createPost = async (req: Request, res: Response) => {
 
 export const PostController = {
     createPost,
-    getAllOrSearchPost
+    getAllOrSearchPost,
+    getPostById,
 };

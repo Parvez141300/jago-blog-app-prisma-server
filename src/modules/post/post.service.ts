@@ -2,6 +2,7 @@ import { Post, Post_status } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
+// get all or search post from db
 const getAllOrSearchPostFromDB = async (payload: {
     search: string | undefined,
     tags: string[] | [],
@@ -60,7 +61,7 @@ const getAllOrSearchPostFromDB = async (payload: {
             author_id: payload.author_id
         })
     }
-    const result = await prisma.post.findMany({
+    const allPost = await prisma.post.findMany({
         take: payload.limit,
         skip: payload.skip,
         where: {
@@ -70,9 +71,36 @@ const getAllOrSearchPostFromDB = async (payload: {
             [sortBy as string]: payload.sortOrder
         }
     });
+
+    const total = await prisma.post.count({
+        where: {
+            AND: addConditions
+        }
+    })
+
+    return {
+        data: allPost,
+        pagination: {
+            total,
+            page: payload.page,
+            limit: payload.limit,
+            totalPages: Math.ceil(total / payload.limit)
+        }
+    };
+}
+
+// get post form db by id
+const getPostByIdFromDB = async (postId: string) => {
+    const result = await prisma.post.findUnique({
+        where: {
+            id: postId
+        }
+    });
+
     return result;
 }
 
+// create a post into db
 const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_at' | 'author_id'>, userId: string) => {
     // logic to create a post in the database
     console.log(data);
@@ -89,4 +117,5 @@ const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_
 export const PostService = {
     createPostIntoDB,
     getAllOrSearchPostFromDB,
+    getPostByIdFromDB
 }
