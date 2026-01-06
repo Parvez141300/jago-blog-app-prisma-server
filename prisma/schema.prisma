@@ -37,7 +37,7 @@ model Comment {
   author_id  String //better auth
   post_id    String
   post       Post           @relation(fields: [post_id], references: [id])
-  parent_id  String
+  parent_id  String?
   parent     Comment?       @relation("CommentReplies", fields: [parent_id], references: [id])
   replies    Comment[]      @relation("CommentReplies")
   status     Comment_status @default(APPROVED)

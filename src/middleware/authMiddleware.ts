@@ -23,7 +23,7 @@ export enum UserRole {
 // middleware
 const authMiddleware = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        console.log(req.headers);
+        // console.log(req.headers);
         try {
             const session = await betterAuth.api.getSession({
                 headers: req.headers as Record<string, string>
