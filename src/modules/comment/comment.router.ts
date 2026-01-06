@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get("/:commentId", commentConroller.getCommentById);
 
+router.get("/author/:authorId", commentConroller.getCommentByAuthorId);
+
 router.post("/", authMiddleware(UserRole.USER, UserRole.ADMIN), commentConroller.createComment);
 
 export const commentRouter: Router = router;
