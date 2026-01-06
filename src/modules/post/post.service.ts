@@ -1,4 +1,4 @@
-import { Post, Post_status } from "../../../generated/prisma/client";
+import { Comment_status, Post, Post_status } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -69,6 +69,13 @@ const getAllOrSearchPostFromDB = async (payload: {
         },
         orderBy: {
             [sortBy as string]: payload.sortOrder
+        },
+        include: {
+            _count: {
+                select: {
+                    comments: true
+                }
+            }
         }
     });
 
@@ -105,6 +112,42 @@ const getPostByIdFromDB = async (postId: string) => {
         const postData = await tx.post.findUnique({
             where: {
                 id: postId
+            },
+            include: {
+                comments: {
+                    where: {
+                        parent_id: null,
+                        status: Comment_status.APPROVED
+                    },
+                    orderBy: {
+                        created_at: "desc"
+                    },
+                    include: {
+                        replies: {
+                            where: {
+                                status: Comment_status.APPROVED
+                            },
+                            orderBy: {
+                                created_at: "asc"
+                            },
+                            include: {
+                                replies: {
+                                    where: {
+                                        status: Comment_status.APPROVED
+                                    },
+                                    orderBy: {
+                                        created_at: "asc"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        comments: true
+                    }
+                }
             }
         });
 
