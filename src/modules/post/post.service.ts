@@ -248,7 +248,32 @@ const updatePostIntoDB = async (postId: string, authorId: string, data: Partial<
     return result;
 }
 
+// delete a post which can be deleted post only user created post
+// admin can delete anone's post
+const deletePostFromDB = async (postId: string, authorId: string, isAdmin: boolean) => {
+    console.log(postId, authorId, isAdmin);
+    const postData = await prisma.post.findUnique({
+        where: {
+            id: postId
+        },
+        select: {
+            id: true,
+            author_id: true
+        }
+    });
 
+    if(!isAdmin && (postData?.author_id !== authorId)){
+        throw new Error("You are not the authorized to delete this post");
+    };
+
+    const result = await prisma.post.delete({
+        where: {
+            id: postId
+        }
+    });
+
+    return result;
+}
 
 
 export const PostService = {
@@ -257,4 +282,5 @@ export const PostService = {
     getPostByIdFromDB,
     getMyPostsFromDB,
     updatePostIntoDB,
+    deletePostFromDB,
 }

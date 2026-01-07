@@ -67,26 +67,6 @@ const getMyPosts = async (req: Request, res: Response) => {
     }
 }
 
-const updatePost = async (req: Request, res: Response) => {
-    try {
-        const user = req.user;
-        const { postId } = req.params;
-        const isAdmin = user?.role === UserRole.ADMIN;
-        console.log(user);
-        if (!user) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-        const result = await PostService.updatePostIntoDB(postId as string, user.id, req.body, isAdmin);
-        res.status(200).json(result);
-    } catch (error: any) {
-        res.status(500).json({
-            error: "Failed to update my post",
-            message: error.message,
-            details: error,
-        });
-    }
-}
- 
 const createPost = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -104,10 +84,50 @@ const createPost = async (req: Request, res: Response) => {
     }
 };
 
+const updatePost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        const { postId } = req.params;
+        const isAdmin = user?.role === UserRole.ADMIN;
+        console.log(isAdmin);
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const result = await PostService.updatePostIntoDB(postId as string, user.id, req.body, isAdmin);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(500).json({
+            error: "Failed to update my post",
+            message: error.message,
+            details: error,
+        });
+    }
+}
+
+const deletePost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        const { postId } = req.params;
+        const isAdmin = user?.role === UserRole.ADMIN;
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const result = await PostService.deletePostFromDB(postId as string, user?.id, isAdmin);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(500).json({
+            error: "Failed to delete a post",
+            message: error.message,
+            details: error,
+        });
+    }
+}
+
 export const PostController = {
     createPost,
     getAllOrSearchPost,
     getPostById,
     getMyPosts,
     updatePost,
+    deletePost,
 };

@@ -14,5 +14,7 @@ router.get("/:postId", PostController.getPostById);
 router.patch("/:postId", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.updatePost);
 // create a post
 router.post("/", authMiddleware(UserRole.USER), PostController.createPost);
+// delete a post
+router.delete("/:postId", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.deletePost);
 
 export const postRouter: Router = router;
