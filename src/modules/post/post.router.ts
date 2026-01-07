@@ -10,6 +10,8 @@ router.get("/", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.ge
 router.get("/my-posts", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.getMyPosts);
 // get a post by id
 router.get("/:postId", PostController.getPostById);
+// update a post
+router.patch("/:postId", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.updatePost);
 // create a post
 router.post("/", authMiddleware(UserRole.USER), PostController.createPost);
 

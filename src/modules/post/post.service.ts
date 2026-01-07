@@ -170,7 +170,7 @@ const getMyPostsFromDB = async (authorId: string) => {
         }
     });
 
-    if(userData?.status !== "ACTIVE"){
+    if (userData?.status !== "ACTIVE") {
         throw new Error("User is not active");
     }
 
@@ -217,9 +217,39 @@ const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_
     return result;
 }
 
+// update a post
+const updatePostIntoDB = async (postId: string, authorId: string, data: Partial<Post>, isAdmin: boolean) => {
+    const postData = await prisma.post.findUniqueOrThrow({
+        where: {
+            id: postId
+        },
+        select: {
+            id: true,
+            author_id: true
+        }
+    });
+    if (!isAdmin && (postData.author_id !== authorId)) {
+        throw new Error("You are not the owner/creator of the post");
+    };
+    if(!isAdmin){
+        delete data.isFeatured;
+    }
+    const result = await prisma.post.update({
+        where: {
+            id: postId
+        },
+        data: {
+            ...data
+        }
+    });
+
+    return result;
+}
+
 export const PostService = {
     createPostIntoDB,
     getAllOrSearchPostFromDB,
     getPostByIdFromDB,
     getMyPostsFromDB,
+    updatePostIntoDB,
 }

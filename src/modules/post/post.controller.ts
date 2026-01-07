@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PostService } from "./post.service";
 import { Post_status } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
+import { UserRole } from "../../middleware/authMiddleware";
 
 
 const getAllOrSearchPost = async (req: Request, res: Response) => {
@@ -34,7 +35,7 @@ const getAllOrSearchPost = async (req: Request, res: Response) => {
 const getPostById = async (req: Request, res: Response) => {
     try {
         const { postId } = req.params;
-        if(!postId){
+        if (!postId) {
             throw new Error("Post id is required!!!");
         }
         const result = await PostService.getPostByIdFromDB(postId);
@@ -66,6 +67,26 @@ const getMyPosts = async (req: Request, res: Response) => {
     }
 }
 
+const updatePost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        const { postId } = req.params;
+        const isAdmin = user?.role === UserRole.ADMIN;
+        console.log(user);
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const result = await PostService.updatePostIntoDB(postId as string, user.id, req.body, isAdmin);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(500).json({
+            error: "Failed to update my post",
+            message: error.message,
+            details: error,
+        });
+    }
+}
+ 
 const createPost = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -88,4 +109,5 @@ export const PostController = {
     getAllOrSearchPost,
     getPostById,
     getMyPosts,
+    updatePost,
 };
