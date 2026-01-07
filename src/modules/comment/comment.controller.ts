@@ -46,6 +46,22 @@ const createComment = async (req: Request, res: Response) => {
     }
 }
 
+const updateComment = async (req: Request, res: Response) => {
+    try {
+        const { commentId } = req.params;
+        const commentData = req.body;
+        const user = req.user;
+        const result = await commentService.updateCommentIntoDB(commentId as string, commentData, user?.id as string);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(404).json({
+            error: "Failed to update a comment",
+            message: error.message,
+            details: error
+        });
+    }
+}
+
 const deleteComment = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -65,5 +81,6 @@ export const commentConroller = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
-    deleteComment
+    deleteComment,
+    updateComment,
 }

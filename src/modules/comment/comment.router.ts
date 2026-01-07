@@ -10,6 +10,8 @@ router.get("/author/:authorId", commentConroller.getCommentByAuthorId);
 
 router.post("/", authMiddleware(UserRole.USER, UserRole.ADMIN), commentConroller.createComment);
 
+router.patch("/:commentId", authMiddleware(UserRole.USER, UserRole.ADMIN), commentConroller.updateComment);
+
 router.delete("/:commentId", authMiddleware(UserRole.USER, UserRole.ADMIN), commentConroller.deleteComment);
 
 export const commentRouter: Router = router;

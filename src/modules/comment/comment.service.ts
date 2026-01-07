@@ -1,3 +1,4 @@
+import { Comment_status } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 const getCommentByIdFromDB = async (commentId: string | undefined) => {
@@ -63,7 +64,8 @@ const createCommentIntoDB = async (payload: {
     return result;
 }
 
-const deleteCommentFromDB = async (commentId: string, authorId: string ) => {
+const updateCommentIntoDB = async (commentId: string, data: { content?: string, status?: Comment_status }, authorId: string) => {
+    console.log(commentId, data, authorId);
     const commentData = await prisma.comment.findFirst({
         where: {
             id: commentId,
@@ -74,7 +76,36 @@ const deleteCommentFromDB = async (commentId: string, authorId: string ) => {
         }
     })
 
-    if(!commentData){
+    if (!commentData) {
+        throw new Error("Your provided input is not valid!!!");
+    }
+
+    const result = await prisma.comment.update({
+        where: {
+            id: commentId,
+            author_id: authorId
+        },
+        data: {
+            content: data.content as string,
+            status: data.status as Comment_status
+        }
+    })
+
+    return result;
+}
+
+const deleteCommentFromDB = async (commentId: string, authorId: string) => {
+    const commentData = await prisma.comment.findFirst({
+        where: {
+            id: commentId,
+            author_id: authorId
+        },
+        select: {
+            id: true
+        }
+    })
+
+    if (!commentData) {
         throw new Error("Your provided input is not valid!!!");
     }
     console.log(commentData);
@@ -91,5 +122,6 @@ export const commentService = {
     createCommentIntoDB,
     getCommentByIdFromDB,
     getCommentByAuthorIdFromDB,
-    deleteCommentFromDB
+    deleteCommentFromDB,
+    updateCommentIntoDB,
 }
