@@ -67,6 +67,19 @@ const getMyPosts = async (req: Request, res: Response) => {
     }
 }
 
+const getStats = async (req: Request, res: Response) => {
+    try {
+        const result = await PostService.getStatsFromDB();
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(500).json({
+            error: "Failed to get post stats",
+            message: error.message,
+            details: error,
+        });
+    }
+}
+
 const createPost = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -130,4 +143,5 @@ export const PostController = {
     getMyPosts,
     updatePost,
     deletePost,
+    getStats,
 };

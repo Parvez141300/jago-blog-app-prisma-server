@@ -1,6 +1,7 @@
 import { Comment_status, Post, Post_status } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middleware/authMiddleware";
 
 // get all or search post from db
 const getAllOrSearchPostFromDB = async (payload: {
@@ -203,6 +204,40 @@ const getMyPostsFromDB = async (authorId: string) => {
     };
 }
 
+// get stats form db
+const getStatsFromDB = async () => {
+    // total post Count, total published post, total draft post, total comments, total Views, total comments, total approved comments, total rejected comments, totalUser, totalAdminPerson, totalUserPerson
+    return prisma.$transaction(async (tx) => {
+        const [totalPosts, totalPublishedPosts, totalDraftPosts, totalArchivedPosts, totalViewsOfPost, totalComments, totalApprovedComments, TotalRejectedComments, totalUser, totalAdminPerson, totalUserPerson] = await Promise.all([
+            await prisma.post.count(),
+            await prisma.post.count({ where: { status: Post_status.PUBLISHED } }),
+            await prisma.post.count({ where: { status: Post_status.DRAFT } }),
+            await prisma.post.count({ where: { status: Post_status.ARCHIVED } }),
+            await prisma.post.aggregate({ _sum: { views: true } }),
+            await prisma.comment.count(),
+            await prisma.comment.count({where: {status: Comment_status.APPROVED}}),
+            await prisma.comment.count({where: {status: Comment_status.REJECTED}}),
+            await prisma.user.count(),
+            await prisma.user.count({where: {role: UserRole.ADMIN}}),
+            await prisma.user.count({where: {role: UserRole.USER}})
+        ]);
+
+        return {
+            totalPosts,
+            totalPublishedPosts,
+            totalDraftPosts,
+            totalArchivedPosts,
+            totalViewsOfPost: totalViewsOfPost._sum.views,
+            totalComments,
+            totalApprovedComments,
+            TotalRejectedComments,
+            totalUser,
+            totalAdminPerson,
+            totalUserPerson,
+        }
+    })
+}
+
 // create a post into db
 const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_at' | 'author_id'>, userId: string) => {
     // logic to create a post in the database
@@ -233,7 +268,7 @@ const updatePostIntoDB = async (postId: string, authorId: string, data: Partial<
     if (!isAdmin && (postData.author_id !== authorId)) {
         throw new Error("You are not the owner/creator of the post");
     };
-    if(!isAdmin){
+    if (!isAdmin) {
         delete data.isFeatured;
     }
     const result = await prisma.post.update({
@@ -262,7 +297,7 @@ const deletePostFromDB = async (postId: string, authorId: string, isAdmin: boole
         }
     });
 
-    if(!isAdmin && (postData?.author_id !== authorId)){
+    if (!isAdmin && (postData?.author_id !== authorId)) {
         throw new Error("You are not the authorized to delete this post");
     };
 
@@ -283,4 +318,5 @@ export const PostService = {
     getMyPostsFromDB,
     updatePostIntoDB,
     deletePostFromDB,
+    getStatsFromDB,
 }
