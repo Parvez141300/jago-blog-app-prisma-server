@@ -217,7 +217,9 @@ const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_
     return result;
 }
 
-// update a post
+// update a post role based like user & admin
+// user can only update his post and can't update his post's isFeatured field
+// admin can update any users post and also can update the isFeatured field
 const updatePostIntoDB = async (postId: string, authorId: string, data: Partial<Post>, isAdmin: boolean) => {
     const postData = await prisma.post.findUniqueOrThrow({
         where: {
@@ -245,6 +247,9 @@ const updatePostIntoDB = async (postId: string, authorId: string, data: Partial<
 
     return result;
 }
+
+
+
 
 export const PostService = {
     createPostIntoDB,
