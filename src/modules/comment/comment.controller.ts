@@ -62,6 +62,20 @@ const updateComment = async (req: Request, res: Response) => {
     }
 }
 
+const moderateComment = async (req: Request, res: Response) => {
+    try {
+        const { commentId } = req.params;
+        const result = await commentService.moderateCommentFromDB(commentId as string, req.body);
+        res.status(200).json(result);
+    } catch (error: any) {
+        const errorMessage = (error instanceof Error) ? error.message : "comment moderate update fialed";
+        res.status(404).json({
+            error: errorMessage,
+            details: error
+        });
+    }
+}
+
 const deleteComment = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -83,4 +97,5 @@ export const commentConroller = {
     getCommentByAuthorId,
     deleteComment,
     updateComment,
+    moderateComment,
 }

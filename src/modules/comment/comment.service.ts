@@ -94,6 +94,33 @@ const updateCommentIntoDB = async (commentId: string, data: { content?: string, 
     return result;
 }
 
+const moderateCommentFromDB = async (commentId: string, data: { status: Comment_status }) => {
+    const commentData = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id: commentId
+        },
+        select: {
+            id: true,
+            status: true
+        }
+    });
+
+    if(commentData.status === data.status){
+        throw new Error(`Status is already in (${commentData.status}) status`);
+    };
+
+    const result = await prisma.comment.update({
+        where: {
+            id: commentId
+        },
+        data: {
+            ...data
+        }
+    });
+
+    return result;
+}
+
 const deleteCommentFromDB = async (commentId: string, authorId: string) => {
     const commentData = await prisma.comment.findFirst({
         where: {
@@ -124,4 +151,5 @@ export const commentService = {
     getCommentByAuthorIdFromDB,
     deleteCommentFromDB,
     updateCommentIntoDB,
+    moderateCommentFromDB,
 }
