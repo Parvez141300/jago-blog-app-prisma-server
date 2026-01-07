@@ -157,6 +157,52 @@ const getPostByIdFromDB = async (postId: string) => {
     return result;
 }
 
+// get my post form db
+const getMyPostsFromDB = async (authorId: string) => {
+    const userData = await prisma.user.findUnique({
+        where: {
+            id: authorId,
+            status: "ACTIVE"
+        },
+        select: {
+            id: true,
+            status: true
+        }
+    });
+
+    if(userData?.status !== "ACTIVE"){
+        throw new Error("User is not active");
+    }
+
+    const result = await prisma.post.findMany({
+        where: {
+            author_id: authorId
+        },
+        orderBy: {
+            created_at: "desc"
+        },
+        include: {
+            _count: {
+                select: {
+                    comments: true
+                }
+            }
+        }
+    });
+
+    const total = await prisma.post.count({
+        where: {
+            author_id: authorId
+        }
+    });
+
+
+    return {
+        data: result,
+        total
+    };
+}
+
 // create a post into db
 const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_at' | 'author_id'>, userId: string) => {
     // logic to create a post in the database
@@ -174,5 +220,6 @@ const createPostIntoDB = async (data: Omit<Post, 'id' | 'created_at' | 'updated_
 export const PostService = {
     createPostIntoDB,
     getAllOrSearchPostFromDB,
-    getPostByIdFromDB
+    getPostByIdFromDB,
+    getMyPostsFromDB,
 }
