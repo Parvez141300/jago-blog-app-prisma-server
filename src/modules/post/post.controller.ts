@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PostService } from "./post.service";
 import { Post_status } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
@@ -80,7 +80,7 @@ const getStats = async (req: Request, res: Response) => {
     }
 }
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         if (!user) {
@@ -89,15 +89,11 @@ const createPost = async (req: Request, res: Response) => {
         const result = await PostService.createPostIntoDB(req.body, user.id);
         res.status(201).json(result);
     } catch (error: any) {
-        res.status(500).json({
-            error: "Failed to create post",
-            message: error.message,
-            details: error,
-        });
+        next(error);
     }
 };
 
-const updatePost = async (req: Request, res: Response) => {
+const updatePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         const { postId } = req.params;
@@ -109,11 +105,7 @@ const updatePost = async (req: Request, res: Response) => {
         const result = await PostService.updatePostIntoDB(postId as string, user.id, req.body, isAdmin);
         res.status(200).json(result);
     } catch (error: any) {
-        res.status(500).json({
-            error: "Failed to update my post",
-            message: error.message,
-            details: error,
-        });
+        next(error);
     }
 }
 
