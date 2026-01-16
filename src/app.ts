@@ -13,17 +13,20 @@ const app: Express = express();
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(cors({
-    origin: process.env.APP_URL || "http://localhost:4000", // client side URL
+    origin: process.env.APP_URL || "http://localhost:5000", // client side URL
     credentials: true
 }));
+
+
+app.get("/", async (req, res) => {
+    res.send("Blog app server is running");
+});
+
 app.use(express.json());
 app.use("/posts", postRouter);
 app.use("/comments", commentRouter);
 app.use(notFound);
 app.use(errorHandler);
 
-app.get("/", async (req, res) => {
-    res.send("Blog app server is running");
-});
 
 export default app;
