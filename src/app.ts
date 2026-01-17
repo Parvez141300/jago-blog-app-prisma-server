@@ -10,19 +10,20 @@ import notFound from "./middleware/notFoundMiddleware";
 const app: Express = express();
 
 // middleware
-app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(cors({
-    origin: process.env.APP_URL || "http://localhost:5000", // client side URL
+    origin: process.env.APP_URL || "http://localhost:3000", // client side URL
     credentials: true
 }));
 
+app.use(express.json());
+
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.get("/", async (req, res) => {
     res.send("Blog app server is running");
 });
 
-app.use(express.json());
 app.use("/posts", postRouter);
 app.use("/comments", commentRouter);
 app.use(notFound);
