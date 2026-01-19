@@ -5,7 +5,7 @@ import authMiddleware, { UserRole } from '../../middleware/authMiddleware';
 const router = express.Router();
 
 // get all or search post
-router.get("/", authMiddleware(UserRole.USER, UserRole.ADMIN), PostController.getAllOrSearchPost);
+router.get("/", PostController.getAllOrSearchPost);
 // get stats form the post for admin
 router.get("/stats", authMiddleware(UserRole.ADMIN), PostController.getStats);
 // get my posts
